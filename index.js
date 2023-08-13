@@ -9,7 +9,7 @@ const tournament = require("./Routes/tournament")
 
 app.use(express.json());
 // app.use(cors({origin:"http://localhost:3000"}));
-app.use(cors({origin:"https://steady-shortbread-751776.netlify.app/"}));
+app.use(cors({origin:"https://steady-shortbread-751776.netlify.app"}));
 
 app.use("/api/user",user)
 app.use("/api/tournament",tournament)
