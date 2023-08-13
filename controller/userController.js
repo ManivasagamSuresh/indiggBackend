@@ -11,7 +11,7 @@ const signUp = async(req,res)=>{
         const data = await db.collection("users").findOne({email: req.body.email });
         
         if(data){
-            res.status(400).send("User Already Exist")
+            res.status(400).send("Email already Exist, kindly login to continue")
         }else{
             const hash = await bcrypt.hash(req.body.password,10);
         req.body.password = hash;
@@ -20,7 +20,7 @@ const signUp = async(req,res)=>{
         req.body.admin = 0;
         const user =await db.collection("users").insertOne(req.body);
         await disConnect();
-        res.status(201).send("User Register");
+        res.status(201).send("User Registered");
         }
         
     } catch (error) {
@@ -32,14 +32,19 @@ const login = async(req,res)=>{
     try {
         const db =await Connection();
         const user =await db.collection("users").findOne({email:req.body.email});
-        const compare = await bcrypt.compare(req.body.password,user.password);
-        if(compare){
-            const {password, ...otherinfo} = user
-            res.status(201).send(otherinfo);
-            await disConnect();
-        }
-        else{
-            res.status(401).send("UnAuthorized");
+        if(user){
+
+            const compare = await bcrypt.compare(req.body.password,user.password);
+            if(compare){
+                const {password, ...otherinfo} = user
+                res.status(201).send(otherinfo);
+                await disConnect();
+            }
+            else{
+                res.status(401).send("UnAuthorized, Email and password does not matched");
+            }
+        }else{
+            res.status(401).send("User Not Registers, Kindly signup to continue");
         }
         
     } catch (error) {
