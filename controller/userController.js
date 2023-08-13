@@ -41,10 +41,10 @@ const login = async(req,res)=>{
                 await disConnect();
             }
             else{
-                res.status(401).send("UnAuthorized, Email and password does not matched");
+                res.status(401).send("UnAuthorized, Email and password do not match");
             }
         }else{
-            res.status(401).send("User Not Registers, Kindly signup to continue");
+            res.status(401).send("User Not Registered, Kindly signup to continue");
         }
         
     } catch (error) {
