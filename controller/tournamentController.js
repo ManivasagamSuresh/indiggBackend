@@ -8,7 +8,7 @@ const mongodb = require("mongodb");
 const addTournament = async(req,res)=>{
     try {
         const db =await Connection();
-        req.participants = [];
+        req.body.participants = [];
         const tournament =await db.collection("tournament").insertOne(req.body);
         await disConnect();
         res.status(201).send("Tournament Added");
@@ -30,6 +30,18 @@ const getTournament = async(req,res)=>{
 }
 
 
+const getTournamentId = async(req,res)=>{
+    try {
+        const db =await Connection();
+        const tournament =await db.collection("tournament").findOne({_id:new mongodb.ObjectId(req.params.id)})
+        await disConnect();
+        res.status(200).send(tournament);
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 const deleteTournament = async(req,res)=>{
     try {
         const db =await Connection();
@@ -45,6 +57,7 @@ const deleteTournament = async(req,res)=>{
 const editTournament = async(req,res)=>{
     try {
         const db =await Connection();
+        delete req.body._id;
         const tournament =await db.collection("tournament").updateOne({_id:new mongodb.ObjectId(req.params.id)},{$set:req.body});
         await disConnect();
         res.status(200).send(tournament);
@@ -58,8 +71,9 @@ const editTournament = async(req,res)=>{
 const addParticipant = async(req,res)=>{
     try {
         const db =await Connection();
+        
         const tournament =await db.collection("tournament").updateOne({_id:new mongodb.ObjectId(req.params.id)},{$addToSet:{participants:req.body}});
-        const user =await db.collection("users").updateOne({_id: new mongodb.ObjectId(req.body._id)},{$addToSet:{tournaments: new mongodb.ObjectId(req.params.id)}});
+        const user =await db.collection("users").updateOne({_id: new mongodb.ObjectId(req.body._id)},{$addToSet:{tournaments: req.params.id}});
         await disConnect();
         res.status(200).send(tournament);
         
@@ -82,4 +96,19 @@ const deleteParticipant = async(req,res)=>{
     }
 }
 
-module.exports = {addTournament, getTournament, deleteTournament, editTournament, addParticipant, deleteParticipant }
+const editParticipant = async(req,res)=>{
+    try {
+        const db =await Connection();
+        
+        const tournament =await db.collection("tournament").updateOne({_id:new mongodb.ObjectId(req.params.id),"participants._id": req.body._id},{$set:{"participants.$.name": req.body.name,
+        "participants.$.email": req.body.email,}});
+        
+        await disConnect();
+        res.status(200).send(tournament);
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+module.exports = {addTournament, getTournament, getTournamentId, deleteTournament, editTournament, addParticipant, deleteParticipant, editParticipant }

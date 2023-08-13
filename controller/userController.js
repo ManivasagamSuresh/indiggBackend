@@ -9,12 +9,15 @@ const signUp = async(req,res)=>{
     try {
         const db =await Connection();
         const data = await db.collection("users").findOne({email: req.body.email });
+        
         if(data){
             res.status(400).send("User Already Exist")
         }else{
             const hash = await bcrypt.hash(req.body.password,10);
         req.body.password = hash;
+        delete req.body.confirmpassword;
         req.body.tournaments = [];
+        req.body.admin = 0;
         const user =await db.collection("users").insertOne(req.body);
         await disConnect();
         res.status(201).send("User Register");
@@ -31,7 +34,8 @@ const login = async(req,res)=>{
         const user =await db.collection("users").findOne({email:req.body.email});
         const compare = await bcrypt.compare(req.body.password,user.password);
         if(compare){
-            res.status(201).send("success");
+            const {password, ...otherinfo} = user
+            res.status(201).send(otherinfo);
             await disConnect();
         }
         else{
